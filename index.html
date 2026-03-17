@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EverNest — Your Family's Digital Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e1117;
+      --bg2:       #161b24;
+      --bg3:       #1c2230;
+      --border:    #2a3040;
+      --accent:    #029CFF;
+      --accent2:   #96abff;
+      --accent3:   #4CFF7A;
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --danger:    #FF6B6B;
+      --gold:      #FFD700;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── Noise overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Glow blobs ── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -200px; }
+    .blob-2 { width: 400px; height: 400px; background: var(--accent2); bottom: 10%; right: -100px; }
+    .blob-3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 40%; }
+
+    section, nav, footer { position: relative; z-index: 1; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 60px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(14, 17, 23, 0.85);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent2);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #000;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(2, 156, 255, 0.1);
+      border: 1px solid rgba(2, 156, 255, 0.3);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(48px, 8vw, 90px);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -2px;
+      max-width: 900px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%, var(--accent3) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      margin-top: 24px;
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 560px;
+      font-weight: 300;
+      line-height: 1.7;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      margin-top: 40px;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(2,156,255,0.3); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 15px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* App preview mockup */
+    .hero-mockup {
+      margin-top: 64px;
+      width: 100%;
+      max-width: 860px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    .mockup-bar {
+      background: var(--bg3);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-dot:nth-child(1) { background: #FF6B6B; }
+    .mockup-dot:nth-child(2) { background: #FFD700; }
+    .mockup-dot:nth-child(3) { background: #4CFF7A; }
+    .mockup-title { margin-left: 8px; font-size: 13px; color: var(--muted); }
+
+    .mockup-body {
+      display: flex;
+      height: 340px;
+    }
+
+    .mockup-sidebar {
+      width: 180px;
+      background: #141820;
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+      flex-shrink: 0;
+    }
+
+    .mockup-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent2);
+      margin-bottom: 24px;
+    }
+
+    .mockup-nav-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 4px;
+      cursor: default;
+    }
+    .mockup-nav-item.active { background: var(--accent); color: #000; font-weight: 600; }
+    .mockup-nav-item.inactive { color: var(--muted); }
+
+    .mockup-content {
+      flex: 1;
+      padding: 20px;
+      background: var(--bg2);
+    }
+
+    .mockup-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 14px;
+    }
+
+    .mockup-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .mockup-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .mockup-card-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+    .mockup-card-value { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+    .mockup-card-value.green { color: var(--accent3); }
+    .mockup-card-value.blue { color: var(--accent); }
+    .mockup-card-value.purple { color: var(--accent2); }
+
+    .mockup-panel {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      height: 160px;
+    }
+    .mockup-panel-title { font-size: 11px; color: var(--accent2); font-weight: 600; margin-bottom: 10px; }
+    .mockup-line { height: 8px; border-radius: 4px; background: var(--border); margin-bottom: 8px; }
+    .mockup-line-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+    /* ── FEATURES ── */
+    .section { padding: 100px 60px; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { border-color: rgba(2,156,255,0.3); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .feature-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+    /* ── PRICING ── */
+    #pricing { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    .pricing-wrapper {
+      display: flex;
+      gap: 24px;
+      margin-top: 60px;
+      max-width: 900px;
+    }
+
+    .pricing-card {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .pricing-card.featured {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(2,156,255,0.05) 0%, rgba(150,171,255,0.05) 100%);
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .pricing-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .pricing-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin: 16px 0 4px;
+    }
+    .pricing-price span { font-size: 20px; font-weight: 400; color: var(--muted); }
+    .pricing-desc { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+    .pricing-features { list-style: none; margin-bottom: 32px; }
+    .pricing-features li {
+      font-size: 14px;
+      color: var(--muted);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pricing-features li:last-child { border-bottom: none; }
+    .pricing-features li::before { content: '✓'; color: var(--accent3); font-weight: 700; flex-shrink: 0; }
+    .pricing-features li.muted::before { content: '–'; color: var(--border); }
+    .pricing-features li.muted { opacity: 0.5; }
+
+    .pricing-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .pricing-btn.primary { background: var(--accent); color: #000; }
+    .pricing-btn.primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .pricing-btn.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .pricing-btn.outline:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* ── POLICY SECTIONS ── */
+    .policy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 60px;
+    }
+
+    .policy-block {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+    .policy-block h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .policy-block p, .policy-block li {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 8px;
+    }
+    .policy-block ul { padding-left: 16px; }
+    .policy-block ul li { margin-bottom: 4px; }
+
+    /* ── CONTACT ── */
+    #contact { border-top: 1px solid var(--border); }
+    .contact-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      margin-top: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 40px;
+    }
+    .contact-info h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .contact-info p { color: var(--muted); font-size: 14px; max-width: 400px; line-height: 1.7; }
+    .contact-details { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .contact-item strong { color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent2);
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .section { padding: 60px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-wrapper { flex-direction: column; }
+      .policy-grid { grid-template-columns: 1fr; }
+      .contact-card { flex-direction: column; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+      .hero-btns { flex-direction: column; align-items: center; }
+      .mockup-sidebar { display: none; }
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0 60px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">EverNest</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#policies">Policies</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#pricing" class="nav-cta">Get Started</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🏠 Now available for Windows</div>
+  <h1>Your Family's<br /><span>Digital Home</span></h1>
+  <p class="hero-sub">Budgets, calendars, notes, and finances — all shared with your household. One app for everything that keeps your family running.</p>
+  <div class="hero-btns">
+    <a href="#pricing" class="btn-primary">Start Free Trial</a>
+    <a href="#features" class="btn-secondary">See Features</a>
+  </div>
+
+  <!-- App mockup -->
+  <div class="hero-mockup">
+    <div class="mockup-bar">
+      <div class="mockup-dot"></div>
+      <div class="mockup-dot"></div>
+      <div class="mockup-dot"></div>
+      <span class="mockup-title">EverNest — Dashboard</span>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="mockup-logo">EverNest</div>
+        <div class="mockup-nav-item active">Dashboard</div>
+        <div class="mockup-nav-item inactive">Financial</div>
+        <div class="mockup-nav-item inactive">Calendar</div>
+        <div class="mockup-nav-item inactive">Budget</div>
+        <div class="mockup-nav-item inactive">Notes</div>
+        <div class="mockup-nav-item inactive">My Family</div>
+      </div>
+      <div class="mockup-content">
+        <div class="mockup-heading">Welcome back, Cody</div>
+        <div class="mockup-cards">
+          <div class="mockup-card">
+            <div class="mockup-card-label">Net Worth</div>
+            <div class="mockup-card-value green">$24,810</div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-label">Coming Up</div>
+            <div class="mockup-card-value blue">Tomorrow</div>
+          </div>
+          <div class="mockup-card">
+            <div class="mockup-card-label">Secure Vault</div>
+            <div class="mockup-card-value purple">Ready</div>
+          </div>
+        </div>
+        <div class="mockup-panel">
+          <div class="mockup-panel-title">BUDGET THIS MONTH</div>
+          <div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;"><span>Food & Dining</span><span>$340 / $400</span></div>
+            <div class="mockup-line"><div class="mockup-line-fill" style="width:85%;background:linear-gradient(90deg,#029CFF,#96abff);"></div></div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;"><span>Transport</span><span>$180 / $250</span></div>
+            <div class="mockup-line"><div class="mockup-line-fill" style="width:72%;background:linear-gradient(90deg,#4CFF7A,#029CFF);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-bottom:4px;"><span>Shopping</span><span>$520 / $300</span></div>
+            <div class="mockup-line"><div class="mockup-line-fill" style="width:100%;background:linear-gradient(90deg,#FF6B6B,#FFD700);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">Everything you need</div>
+  <h2 class="section-title">Built for real family life</h2>
+  <p class="section-sub">Not just another finance app. EverNest is a full household management platform designed for families.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">💳</span>
+      <div class="feature-title">Bank Integration</div>
+      <p class="feature-desc">Connect all your bank accounts via Plaid. See every transaction, balance, and your combined family net worth in real time.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">Smart Budgeting</div>
+      <p class="feature-desc">Set spending limits by category. We automatically pull your transactions and show you exactly where your money is going this month.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📅</span>
+      <div class="feature-title">Shared Calendar</div>
+      <p class="feature-desc">One calendar for the whole family. Color-coded per person, with popup reminders for bills, appointments, and meetings.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📝</span>
+      <div class="feature-title">Rich Notes</div>
+      <p class="feature-desc">Full-featured notes with bold, italic, headings, highlights, text colors, bullet points, and inline checkboxes.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🏠</span>
+      <div class="feature-title">Family Accounts</div>
+      <p class="feature-desc">Invite your spouse or family members. Share your budget, calendar, and financial overview under one household.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🌤️</span>
+      <div class="feature-title">Live Weather</div>
+      <p class="feature-desc">Your local weather displayed right on the dashboard. Temperature, conditions, wind, humidity — updated every session.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="section-label">Simple pricing</div>
+  <h2 class="section-title">One plan, everything included</h2>
+  <p class="section-sub">No hidden fees. Cancel any time. Your data is always yours.</p>
+
+  <div class="pricing-wrapper">
+    <!-- Free tier -->
+    <div class="pricing-card">
+      <div class="pricing-name">Free</div>
+      <div class="pricing-price">$0<span>/mo</span></div>
+      <p class="pricing-desc">Get started with the basics.</p>
+      <ul class="pricing-features">
+        <li>Dashboard & weather</li>
+        <li>Calendar & notes</li>
+        <li>Secure vault</li>
+        <li class="muted">Bank account linking</li>
+        <li class="muted">Budget tracker</li>
+        <li class="muted">Family sharing</li>
+      </ul>
+      <a href="#" class="pricing-btn outline">Download Free</a>
+    </div>
+
+    <!-- Pro tier -->
+    <div class="pricing-card featured">
+      <div class="pricing-badge">MOST POPULAR</div>
+      <div class="pricing-name">EverNest Pro</div>
+      <div class="pricing-price">$9.99<span>/mo</span></div>
+      <p class="pricing-desc">Everything your household needs.</p>
+      <ul class="pricing-features">
+        <li>Everything in Free</li>
+        <li>Connect bank accounts via Plaid</li>
+        <li>Smart budget tracker</li>
+        <li>Family sharing (invite spouse/family)</li>
+        <li>Shared calendar & finances</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#contact" class="pricing-btn primary">Get Pro — $9.99/mo</a>
+    </div>
+  </div>
+
+  <p style="margin-top:24px;font-size:13px;color:var(--muted);">
+    💳 Payments processed securely by <strong style="color:var(--text);">Stripe</strong> and <strong style="color:var(--text);">PayPal</strong>. Cancel any time — no questions asked.
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- POLICIES -->
+<section class="section" id="policies">
+  <div class="section-label">Legal & Policies</div>
+  <h2 class="section-title">Clear and fair policies</h2>
+  <p class="section-sub">We believe in full transparency. Here's exactly how EverNest works.</p>
+
+  <div class="policy-grid">
+
+    <div class="policy-block">
+      <h3>🔄 Cancellation & Refund Policy</h3>
+      <p>You may cancel your EverNest Pro subscription at any time from within the app or by contacting us at <strong>support@evernest.app</strong>.</p>
+      <ul>
+        <li>Cancellations take effect at the end of your current billing period.</li>
+        <li>You retain Pro access until your paid period expires.</li>
+        <li>We offer a full refund within <strong>7 days</strong> of your initial subscription if you are unsatisfied.</li>
+        <li>Refunds after 7 days are reviewed on a case-by-case basis.</li>
+        <li>To request a refund, email <strong>support@evernest.app</strong> with your account email and reason.</li>
+      </ul>
+    </div>
+
+    <div class="policy-block">
+      <h3>🔒 Privacy Policy</h3>
+      <p>We take your privacy seriously. EverNest collects only what is necessary to operate the service.</p>
+      <ul>
+        <li>We collect your name, email, and encrypted password to create your account.</li>
+        <li>Bank data is accessed via Plaid and is never stored on EverNest servers beyond access tokens.</li>
+        <li>We do not sell or share your personal data with third parties.</li>
+        <li>Payment processing is handled by Stripe and PayPal — EverNest never stores card details.</li>
+        <li>You may request deletion of your account and all associated data at any time.</li>
+      </ul>
+    </div>
+
+    <div class="policy-block">
+      <h3>📋 Terms of Service</h3>
+      <ul>
+        <li>EverNest is a personal finance and household management tool intended for personal use.</li>
+        <li>You are responsible for maintaining the security of your account credentials.</li>
+        <li>EverNest is not a licensed financial advisor. Information displayed is for personal tracking only.</li>
+        <li>We reserve the right to suspend accounts that violate these terms.</li>
+        <li>Service availability is provided on a best-effort basis. We are not liable for data loss due to unforeseen outages.</li>
+        <li>These terms may be updated with 30 days notice via email.</li>
+      </ul>
+    </div>
+
+    <div class="policy-block">
+      <h3>🏦 Financial Data & Security</h3>
+      <ul>
+        <li>Bank connections are powered by <strong>Plaid</strong>, a trusted financial data platform used by thousands of apps.</li>
+        <li>EverNest uses read-only access to your bank data — we cannot move or modify funds.</li>
+        <li>All data is transmitted over encrypted HTTPS connections.</li>
+        <li>Passwords are hashed using industry-standard bcrypt encryption.</li>
+        <li>You can disconnect your bank accounts at any time from the Financial tab.</li>
+        <li>EverNest complies with applicable data protection regulations.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="section-label">Get in touch</div>
+  <h2 class="section-title">We're here to help</h2>
+
+  <div class="contact-card">
+    <div class="contact-info">
+      <h3>Support & Questions</h3>
+      <p>Have a question about your subscription, need help with the app, or want to request a refund? Reach out and we'll get back to you within 24 hours.</p>
+    </div>
+    <div class="contact-details">
+      <div class="contact-item">
+        <span>📧</span>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Support Email</div><strong>support@evernest.app</strong></div>
+      </div>
+      <div class="contact-item">
+        <span>🏢</span>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Developer</div><strong>N0Ctrl Studios</strong></div>
+      </div>
+      <div class="contact-item">
+        <span>⏱️</span>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Response Time</div><strong>Within 24 hours</strong></div>
+      </div>
+      <div class="contact-item">
+        <span>🌐</span>
+        <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Website</div><strong>evernest-swz9.onrender.com</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">EverNest</div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#policies">Privacy</a>
+    <a href="#policies">Terms</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 N0Ctrl Studios. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
